@@ -6,6 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+import psycopg2
+from psycopg2 import sql
 
 from termcolor import colored
 
@@ -36,6 +40,16 @@ def print_status(message: str, status_type: str):
     print(colored(message, colors.get(status_type, 'white')))
 
 def execute_query(query: str, params: tuple):
+    db_config = {
+        'dbname': 'help',
+        'user': 'helpthing',
+        'password': os.getenv('DB_PASSWORD'),
+        'host': os.getenv('DB_HOST'),
+        'port': 5432
+    }
+
+    connection = psycopg2.connect(**db_config)
+    cursor = connection.cursor()
     try:
         cursor.execute(query, params)
         conn.commit()
@@ -48,10 +62,11 @@ def execute_query(query: str, params: tuple):
 print('*** Setting up postgres database ***')
 # Database connection settings
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:pw@localhost/papi2")
+print("database url: ", DATABASE_URL)
 
-
-async def get_db_connection():
-    return await app.state.db_pool.acquire()
+# comment pooling method
+# async def get_db_connection():
+#     return await app.state.db_pool.acquire()
 ############################# Database Operations
 
 
@@ -70,7 +85,6 @@ async def list_experts(chapterID: int):
     """
     print(2)
     conn = await get_db_connection()
-    cursor = conn.cursor()
     print(3)
     try:
         print(f"Getting experts for chapter {chapterID}")
