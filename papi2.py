@@ -52,7 +52,6 @@ def execute_query(query: str, params: tuple):
     cursor = connection.cursor()
     try:
         cursor.execute(query, params)
-        conn.commit()
         return cursor.fetchone()
     except Exception as e:
         print_status(f"Database error: {str(e)}", "error")
